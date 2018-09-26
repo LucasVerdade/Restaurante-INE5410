@@ -25,3 +25,13 @@ const char* pedido_prato_to_name(pedido_prato_t pedido) {
     }
     return pedido_prato_names[pedido];
 }
+void preparar_pedido(pedido_t pedido){
+	switch(pedido_prato_from_name){
+	case 'pedido_prato_from_name'
+		if (pedido_prato_from_name == 1) {
+			
+		}
+
+
+	}
+}
