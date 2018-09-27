@@ -21,8 +21,6 @@ void cozinha_destroy(cozinha_t* cozinha) {
 }
 
 void processar_pedido(pedido_t pedido) {
-	// criar semaforo de acesso ao fogao p os cozinheiros
-	// criar semaforo para acesso ao bacao de pedidos prontos
 
 
 		
@@ -55,3 +53,15 @@ void produzir_pedido(pedido_t* pedido){
     break;
 
     }
+void* fazer_carne(void* arg) {
+    carne_t* carne = create_carne();
+    prato_t* prato = create_prato(*pedido);
+    cortar_carne(carne);
+    temperar_carne(carne);
+    grelhar_carne(carne);
+    empratar_carne(carne, prato);
+}
+
+void* fazer_spaghetti(void * arg) {
+
+}
