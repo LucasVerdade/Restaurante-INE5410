@@ -3,6 +3,7 @@
 
 #include "pedido.h"
 #include "tarefas.h"
+#include <semaphore.h>
 
 typedef struct {
 	int* cozinheiroBuffer;

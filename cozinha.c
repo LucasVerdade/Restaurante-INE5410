@@ -1,6 +1,5 @@
 #include "cozinha.h"
 #include <stdlib.h>
-#include <semaphore.h>
 #include <pthread.h>
 
 void cozinha_init(int cozinheiros, int bocas, int frigideiras, int garcons, int tam_balcao) {
