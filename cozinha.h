@@ -5,12 +5,6 @@
 #include "tarefas.h"
 #include <semaphore.h>
 
-typedef struct {
-	agua_t* agua;
-	caldo_t* caldo;
-} blabla;
-
-
 
 sem_t pratos_prontos_balcao;
 sem_t espacos_vazios_balcao;
