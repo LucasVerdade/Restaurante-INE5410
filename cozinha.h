@@ -12,6 +12,8 @@ sem_t espacos_vazios_balcao;
 sem_t frigideiras;
 sem_t bocas_livres;
 
+prato_t* balcao_prontos;
+
 extern void cozinha_init(int cozinheiros, int bocas, int frigideiras, int garcons, int tam_balcao);
 extern void cozinha_destroy();
 extern void processar_pedido(pedido_t p);

@@ -1,4 +1,5 @@
 #include "cozinha.h"
+#include "tarefas.h"
 #include <stdlib.h>
 #include <pthread.h>
 
@@ -8,6 +9,8 @@ void cozinha_init(int cozinheiros, int bocas, int frigideiras, int garcons, int 
 
  sem_init(&frigideiras,NULL,frigideiras);
  sem_init(&bocas_livres,NULL,bocas);
+
+ balcao_prontos = (prato_t*)malloc(tam_balcao * sizeof(prato_t));
 
 }
 
@@ -30,7 +33,7 @@ void processar_pedido (pedido_t pedido) {
         if (&cozinheiro[i]->livre)
         {
             &cozinheiro[i]->livre = false;
-            /** pega as 3 bocas e a frigideira necessarias para o pedido **/
+             pega as 3 bocas e a frigideira necessarias para o pedido
             sem_wait(&frigideiras);
             
             for(int i = 0; i < 3; i++) 
@@ -49,9 +52,14 @@ void processar_pedido (pedido_t pedido) {
 }
 
 
-void produzir_pedido(pedido_t* pedido){
+void * produzir_pedido(void * arg){
 	switch(pedido->prato){
     case PEDIDO_SPAGHETTI:
+        
+        for(int i = 0; i < ; i++)
+        {
+            /* code */
+        }
         
     break;
     
@@ -78,6 +86,7 @@ void fazer_sopa(pedido_t* pedido) { // funcao que realmente faz a sopa
     pthread_t parte_agua_thread;
     pthread_t parte_legumes_thread;
 
+    sem_wait(&bocas_livres);
     /** fervendo agua**/
     pthread_create(&parte_agua_thread, NULL, interface_agua, (void*)agua );
     /** cortando legumes **/
@@ -91,19 +100,39 @@ void fazer_sopa(pedido_t* pedido) { // funcao que realmente faz a sopa
     caldo_t* caldo = preparar_caldo(agua);
     cozinhar_legumes(legumes, caldo);
     empratar_sopa(legumes, caldo, prato);
+
+    sem_post(&bocas_livres);
 }
 
 
 void fazer_carne(pedido_t* pedido) { // funcao que realmente faz a carne
+    
     carne_t* carne = create_carne();
     prato_t* prato = create_prato(*pedido);
+    
     cortar_carne(carne);
     temperar_carne(carne);
+    
+    sem_wait(&frigideiras);
+    sem_wait(&bocas_livres);
+
     grelhar_carne(carne);
+
     empratar_carne(carne, prato);
+
+    sem_post(&frigideiras);
+    sem_post(&bocas_livres);
+    
+    notificar_prato_no_balcao(prato);
 }
 
 void fazer_spaghetti(pedido_t* pedido) { // funcao que realmente faz o spaghetti
+    sem_wait(&frigideiras);
+    
+    sem_wait(&bocas_livres);
+    sem_wait(&bocas_livres);
+    sem_wait(&bocas_livres);
+    
     agua_t* agua = create_agua();
     molho_t* molho = create_molho();
     spaghetti_t* massa = create_spaghetti();
@@ -124,7 +153,16 @@ void fazer_spaghetti(pedido_t* pedido) { // funcao que realmente faz o spaghetti
     pthread_join(&parte_molho,NULL);
     pthread_join(&parte_bacon,NULL);
 
-    empratar_spaghetti(massa,molho,bacon,prato);    
+    empratar_spaghetti(massa,molho,bacon,prato);
+    
+    sem_post(&frigideiras);
+
+    sem_post(&bocas_livres);
+    sem_post(&bocas_livres);
+    sem_post(&bocas_livres);
+    
+    sem_wait(&balcao_prontos);
+    notificar_prato_no_balcao(prato);
     }
 
 
