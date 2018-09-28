@@ -6,12 +6,11 @@
 #include <semaphore.h>
 
 typedef struct {
-	int* cozinheiroBuffer;
-	int* bocasBuffer;
-	int* frigideirasBuffer;
-	int* garcosBuffer;
-	int* tam_balcaoBuffer;
-} cozinha_t;
+	agua_t* agua;
+	caldo_t* caldo;
+} blabla;
+
+
 
 sem_t pratos_prontos_balcao;
 sem_t espacos_vazios_balcao;
