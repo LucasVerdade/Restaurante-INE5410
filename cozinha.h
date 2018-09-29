@@ -14,7 +14,9 @@ typedef struct {
 
 cozinheiro_t* cozinheiro;
 int num_cozi;
+int tam_balcao_global;
 
+pthread_mutex_t pratos_prontos_mutex;
 
 sem_t pratos_prontos_balcao;
 sem_t espacos_vazios_balcao;
