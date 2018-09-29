@@ -91,7 +91,7 @@ int main(int argc, char** argv) {
         if (!p.prato) 
             fprintf(stderr, "Pedido inválido descartado: \"%s\"\n", buf);
         else 
-            processar_pedido(p);
+            processar_pedido(&p);
     }
     if (ret != EOF) {
         perror("Erro lendo pedidos de stdin:");
