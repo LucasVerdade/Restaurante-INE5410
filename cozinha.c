@@ -7,11 +7,11 @@
 void cozinha_init(int cozinheiros, int bocas, int frigideiras, int garcons, int tam_balcao) {
  sem_init(&pratos_prontos_balcao,0,0);
  sem_init(&espacos_vazios_balcao,0,tam_balcao);
+ sem_init(&cozinheiros_livres,0,cozinheiros);
+ sem_init(&garcons_livres, 0,garcons);
 
  sem_init(&frigideira,0,frigideiras);
  sem_init(&bocas_livres,0,bocas);
-
- sem_init(&cozinheiros_livres,0,cozinheiros);
 
  balcao_prontos = malloc(tam_balcao * sizeof(prato_t));
  
@@ -32,7 +32,7 @@ void cozinha_destroy() {
 
     free(balcao_prontos);
     free(cozinheiro);
-    free(&num_cozi);
+    free(num_cozi);
 
 }
 
@@ -66,26 +66,26 @@ void * produzir_pedido(void * arg){
                 case PEDIDO_SPAGHETTI:
                     coz->livre = 0;
                     pthread_create(&coz->thread,NULL,interface_fazer_spaghetti, (void * )pedido);
-                    return 0;
+                    return NULL;
                 break;
                 
                 case PEDIDO_SOPA:
                     // Definir a receita da sopa atraves das tarefas
                     coz->livre = 0;
                     pthread_create(&coz->thread,NULL,interface_fazer_sopa, (void * )pedido);            
-                    return 0;
+                    return NULL;
                 break;
                 
                 case PEDIDO_CARNE:
                     // Definir a receita da carne atraves das tarefas
                     coz->livre = 0;
                     pthread_create(coz->thread,NULL,interface_fazer_carne, (void * )pedido);            
-                    return 0;
+                    return NULL;
                 break;
                 
                 case PEDIDO__SIZE:
-                    pedido_prato_to_name(pedido);
-                    return 0;
+                    pedido_prato_to_name(pedido->prato);
+                    return NULL;
                 break;
                 }   
             } else if (i == (num_cozi-1)) { //reseta caso não consiga pegar a thread

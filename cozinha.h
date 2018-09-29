@@ -31,7 +31,7 @@ extern void cozinha_init(int cozinheiros, int bocas, int frigideiras, int garcon
 extern void cozinha_destroy();
 extern void processar_pedido(pedido_t* p);
 
-void produzir_pedido(pedido_t* pedido);
+void * produzir_pedido(void * arg);
 
 void * funcao_garcom(void * prato);
 
