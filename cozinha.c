@@ -32,7 +32,7 @@ void cozinha_destroy() {
 
     free(balcao_prontos);
     free(cozinheiro);
-    free(num_cozi);
+    free(&num_cozi);
 
 }
 
@@ -66,32 +66,35 @@ void * produzir_pedido(void * arg){
                 case PEDIDO_SPAGHETTI:
                     coz->livre = 0;
                     pthread_create(&coz->thread,NULL,interface_fazer_spaghetti, (void * )pedido);
-                    return;
+                    return 0;
                 break;
                 
                 case PEDIDO_SOPA:
                     // Definir a receita da sopa atraves das tarefas
                     coz->livre = 0;
                     pthread_create(&coz->thread,NULL,interface_fazer_sopa, (void * )pedido);            
-                    return;
+                    return 0;
                 break;
                 
                 case PEDIDO_CARNE:
                     // Definir a receita da carne atraves das tarefas
                     coz->livre = 0;
                     pthread_create(coz->thread,NULL,interface_fazer_carne, (void * )pedido);            
-                    return;
+                    return 0;
                 break;
                 
                 case PEDIDO__SIZE:
                     pedido_prato_to_name(pedido);
-                    return;
+                    return 0;
                 break;
                 }   
+            } else if (i == (num_cozi-1)) { //reseta caso não consiga pegar a thread
+                i =0;
             }
+
         }
         
-        
+
 }
 // Fazer adaptador de legumes para thread usando struct criada como retorno;
 void fazer_sopa(pedido_t* pedido) { // funcao que realmente faz a sopa
@@ -119,6 +122,9 @@ void fazer_sopa(pedido_t* pedido) { // funcao que realmente faz a sopa
 
     sem_post(&bocas_livres);
     // inserir semaforo do balcao pronto
+    sem_wait(&espacos_vazios_balcao);
+    sem_post(&balcao_prontos);
+
     notificar_prato_no_balcao(prato);
     sem_post(&cozinheiros_livres);
     
@@ -143,8 +149,8 @@ void fazer_carne(pedido_t pedido) { // funcao que realmente faz a carne
     sem_post(&frigideira);
     sem_post(&bocas_livres);
     
-    sem_post(&balcao_prontos);
     sem_wait(&espacos_vazios_balcao);
+    sem_post(&balcao_prontos);
 
     notificar_prato_no_balcao(prato);
     sem_post(&cozinheiros_livres);
@@ -172,11 +178,11 @@ void fazer_spaghetti(pedido_t* pedido) { // funcao que realmente faz o spaghetti
     pthread_create(&parte_molho,0, interface_spag_molho ,(void *)molho);
     pthread_create(&parte_bacon,0, interface_spag_bacon , (void *)bacon);
     
-    pthread_join(&parte_agua,NULL);
+    pthread_join(parte_agua,NULL);
     cozinhar_spaghetti(massa, agua);
 
-    pthread_join(&parte_molho,NULL);
-    pthread_join(&parte_bacon,NULL);
+    pthread_join(parte_molho,NULL);
+    pthread_join(parte_bacon,NULL);
 
     empratar_spaghetti(massa,molho,bacon,prato);
     
@@ -186,8 +192,11 @@ void fazer_spaghetti(pedido_t* pedido) { // funcao que realmente faz o spaghetti
     sem_post(&bocas_livres);
     sem_post(&bocas_livres);
     
-    sem_wait(&balcao_prontos);
+    sem_wait(&espacos_vazios_balcao);
+    sem_post(&balcao_prontos);
+
     notificar_prato_no_balcao(prato);
+    sem_post(&cozinheiros_livres);
     }
 
 
@@ -223,6 +232,7 @@ void * interface_agua (void * arg) {
 }
 void * interface_legumes (void * arg) {
     legumes_t* legumes = (legumes_t*)arg;
+    cortar_legumes(legumes);
     pthread_exit(NULL);
 
 }
