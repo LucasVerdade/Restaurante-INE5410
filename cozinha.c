@@ -42,7 +42,7 @@ void processar_pedido (pedido_t* pedido) {
 }
 void * funcao_garcom(void * arg) {
     prato_t* prato = (prato_t*) arg;
-
+    
     sem_wait(&balcao_prontos);
     sem_post(&espacos_vazios_balcao);
     entregar_pedido(prato);
