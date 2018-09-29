@@ -148,7 +148,7 @@ void fazer_sopa(pedido_t* pedido) { // funcao que realmente faz a sopa
         {
             if (balcao_prontos[i].pedido.prato == PEDIDO_NULL){
                 pthread_mutex_lock(&pratos_prontos_mutex);
-                
+                // POSSIVELMENTE ERRO AQUI
                 balcao_prontos[i] = *prato;
                 
                 pthread_mutex_unlock(&pratos_prontos_mutex);
