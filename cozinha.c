@@ -42,49 +42,56 @@ void processar_pedido (pedido_t* pedido) {
 }
 void * funcao_garcom(void * arg) {
     prato_t* prato = (prato_t*) arg;
-    
-    sem_wait(&balcao_prontos);
-    sem_post(&espacos_vazios_balcao);
-    entregar_pedido(prato);
+    while (1) {
+        sem_wait(&garcons_livres);
+        sem_wait(&balcao_prontos);
+        sem_post(&espacos_vazios_balcao);
+        
+        entregar_pedido(prato);
+        
+        sem_post(&garcons_livres);
+    }
 }
 
 void * produzir_pedido(void * arg){
 	pedido_t* pedido = (pedido_t*) arg;
 
-    sem_wait(&cozinheiros_livres);
-    for(int i = 0; i < num_cozi; i++)
-    {
-        cozinheiro_t* coz = &cozinheiro[i];
-        if (coz->livre == 1) {
-            switch(pedido->prato){
+        sem_wait(&cozinheiros_livres);
+        for(int i = 0; i < num_cozi; i++)
+        {
+            cozinheiro_t* coz = &cozinheiro[i];
+            if (coz->livre == 1) {
+                switch(pedido->prato){
 
-            case PEDIDO_SPAGHETTI:
-                coz->livre = 0;
-                pthread_create(&coz->thread,NULL,interface_fazer_spaghetti, (void * )pedido);
-            break;
-            
-            case PEDIDO_SOPA:
-                // Definir a receita da sopa atraves das tarefas
-                coz->livre = 0;
-                pthread_create(&coz->thread,NULL,interface_fazer_sopa, (void * )pedido);            
-            break;
-            
-            case PEDIDO_CARNE:
-                // Definir a receita da carne atraves das tarefas
-                coz->livre = 0;
-                pthread_create(coz->thread,NULL,interface_fazer_carne, (void * )pedido);            
-            break;
-            
-            case PEDIDO__SIZE:
-                pedido_prato_to_name(pedido);
-            break;
-
-    }
+                case PEDIDO_SPAGHETTI:
+                    coz->livre = 0;
+                    pthread_create(&coz->thread,NULL,interface_fazer_spaghetti, (void * )pedido);
+                    return;
+                break;
+                
+                case PEDIDO_SOPA:
+                    // Definir a receita da sopa atraves das tarefas
+                    coz->livre = 0;
+                    pthread_create(&coz->thread,NULL,interface_fazer_sopa, (void * )pedido);            
+                    return;
+                break;
+                
+                case PEDIDO_CARNE:
+                    // Definir a receita da carne atraves das tarefas
+                    coz->livre = 0;
+                    pthread_create(coz->thread,NULL,interface_fazer_carne, (void * )pedido);            
+                    return;
+                break;
+                
+                case PEDIDO__SIZE:
+                    pedido_prato_to_name(pedido);
+                    return;
+                break;
+                }   
+            }
         }
-    }
-    
-
-    
+        
+        
 }
 // Fazer adaptador de legumes para thread usando struct criada como retorno;
 void fazer_sopa(pedido_t* pedido) { // funcao que realmente faz a sopa

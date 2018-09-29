@@ -17,7 +17,4 @@ typedef struct {
 extern pedido_prato_t pedido_prato_from_name(const char* name);
 extern const char* pedido_prato_to_name(pedido_prato_t pedido);
 
-// funcoes adicionadas
-void produzir_pedido(pedido_t* pedido);
-
 #endif /*__PEDIDO_H__*/
