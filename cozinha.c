@@ -70,7 +70,7 @@ void * funcao_garcom(void * arg) {
 }
 
 void * produzir_pedido(void * arg){
-	pedido_t* pedido = (pedido_t*) arg;
+	pedido_t* pedido = (pedido_t*) arg; // usado no switch apenas para evitar converter
 
         sem_wait(&cozinheiros_livres);
         for(int i = 0; i < num_cozi; i++)
@@ -81,21 +81,24 @@ void * produzir_pedido(void * arg){
 
                 case PEDIDO_SPAGHETTI:
                     coz->livre = 0;
-                    pthread_create(&coz->thread,NULL,interface_fazer_spaghetti, (void * )pedido);
+                    coz->pedido = (pedido_t*)arg;
+                    pthread_create(&coz->thread,NULL,interface_fazer_spaghetti, (void * )coz);
                     return NULL;
                 break;
                 
                 case PEDIDO_SOPA:
                     // Definir a receita da sopa atraves das tarefas
                     coz->livre = 0;
-                    pthread_create(&coz->thread,NULL,interface_fazer_sopa, (void * )pedido);            
+                    coz->pedido = (pedido_t*)arg;
+                    pthread_create(&coz->thread,NULL,interface_fazer_sopa, (void * )coz);            
                     return NULL;
                 break;
                 
                 case PEDIDO_CARNE:
                     // Definir a receita da carne atraves das tarefas
                     coz->livre = 0;
-                    pthread_create(&coz->thread,NULL,interface_fazer_carne, (void * )pedido);            
+                    coz->pedido = (pedido_t*)arg;
+                    pthread_create(&coz->thread,NULL,interface_fazer_carne, (void * )coz);            
                     return NULL;
                 break;
                 
@@ -166,10 +169,10 @@ void fazer_sopa(pedido_t* pedido) { // funcao que realmente faz a sopa
 }
 
 
-void fazer_carne(pedido_t pedido) { // funcao que realmente faz a carne
+void fazer_carne(pedido_t* pedido) { // funcao que realmente faz a carne
     
     carne_t* carne = create_carne();
-    prato_t* prato = create_prato(pedido);
+    prato_t* prato = create_prato(*pedido);
     
     cortar_carne(carne);
     temperar_carne(carne);
@@ -240,21 +243,24 @@ void fazer_spaghetti(pedido_t* pedido) { // funcao que realmente faz o spaghetti
 
 
 void * interface_fazer_carne(void * arg) {
-    pedido_t* pedido = (pedido_t*)arg;
-    fazer_carne(*pedido);
+    cozinheiro_t* coz = (cozinheiro_t*)arg;
+    fazer_carne(coz->pedido);
+    coz->livre = 1;
     pthread_exit(NULL);
 
 }
 void * interface_fazer_spaghetti(void * arg) {
-    pedido_t* pedido = (pedido_t*)arg;
-    fazer_spaghetti(pedido);
+    cozinheiro_t* coz = (cozinheiro_t*)arg;
+    fazer_spaghetti(coz->pedido);
+    coz->livre = 1;
     pthread_exit(NULL);
 
 }
 void * interface_fazer_sopa(void * arg) {
-    pedido_t* pedido = (pedido_t*)arg;
+    cozinheiro_t* coz = (cozinheiro_t*)arg;
 
-    fazer_sopa(pedido);
+    fazer_sopa(coz->pedido);
+    coz->livre = 1;
     sem_post(&cozinheiros_livres);
     pthread_exit(NULL);
 }

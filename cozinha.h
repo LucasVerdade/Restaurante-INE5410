@@ -8,7 +8,9 @@
 
 typedef struct {
     /* 0 se ocupado, 1 se livre*/
+    int id;
     int livre;
+    pedido_t* pedido;
     pthread_t thread;
 } cozinheiro_t;
 
@@ -38,7 +40,7 @@ void * produzir_pedido(void * arg);
 void * funcao_garcom(void * prato);
 
 void fazer_sopa(pedido_t* pedido);
-void fazer_carne(pedido_t pedido);
+void fazer_carne(pedido_t* pedido);
 void fazer_spaghetti(pedido_t* pedido);
 void * interface_fazer_carne(void * arg);
 void * interface_fazer_spaghetti(void * arg);
