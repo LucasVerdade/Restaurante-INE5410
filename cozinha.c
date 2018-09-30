@@ -1,8 +1,11 @@
 #include "cozinha.h"
 #include "tarefas.h"
 #include <stdlib.h>
+#include <stdio.h>
 #include <pthread.h>
 #include <semaphore.h>
+
+#define DEBUG 1
 
 void cozinha_init(int cozinheiros, int bocas, int frigideiras, int garcons, int tam_balcao) {
  sem_init(&pratos_prontos_balcao,0,0);
@@ -71,7 +74,8 @@ void * funcao_garcom(void * arg) {
 
 void * produzir_pedido(void * arg){
 	pedido_t* pedido = (pedido_t*) arg; // usado no switch apenas para evitar converter
-
+    if (DEBUG != 0) {printf("thread gerenciando pedido num: %d \n",pedido->id);}
+    
         sem_wait(&cozinheiros_livres);
         for(int i = 0; i < num_cozi; i++)
         {
@@ -129,6 +133,9 @@ void fazer_sopa(pedido_t* pedido) { // funcao que realmente faz a sopa
     pthread_t parte_legumes_thread;
 
     sem_wait(&bocas_livres);
+
+    if (DEBUG != 0) {printf("Pedido %d: Sopa iniciado",pedido->id);}
+
     /** fervendo agua**/
     pthread_create(&parte_agua_thread, NULL, interface_agua, (void*)agua );
     /** cortando legumes **/
@@ -143,46 +150,60 @@ void fazer_sopa(pedido_t* pedido) { // funcao que realmente faz a sopa
     cozinhar_legumes(legumes, caldo);
     empratar_sopa(legumes, caldo, prato);
 
+
     sem_post(&bocas_livres);
     // inserir semaforo do balcao pronto
     sem_wait(&espacos_vazios_balcao);
-    // coloca no balcao
+
+    if (DEBUG != 0) {printf("Pedido %d: Pronto, esperando balcao ",pedido->id);}
+
+    // fazer func pra isso !!!!!!!!!!!!!!!!!!!!!!
     for(int i = 0; i < tam_balcao_global; i++)
         {
             if (balcao_prontos[i].pedido.prato == PEDIDO_NULL){
                 pthread_mutex_lock(&pratos_prontos_mutex);
                 // POSSIVELMENTE ERRO AQUI
-                balcao_prontos[i] = *prato;
-                
+                balcao_prontos[i] = *prato;                
                 pthread_mutex_unlock(&pratos_prontos_mutex);
-
                 sem_post(&espacos_vazios_balcao);
-
             }
         }
-
     sem_post(&pratos_prontos_balcao);
 
     notificar_prato_no_balcao(prato);
     sem_post(&cozinheiros_livres);
-    
+}
+void colocar_no_balcao(prato_t* prato){
+    for(int i = 0; i < tam_balcao_global; i++)
+    {
+        if (balcao_prontos[i].pedido.prato == PEDIDO_NULL){
+            pthread_mutex_lock(&pratos_prontos_mutex);
+            // POSSIVELMENTE ERRO AQUI
+            balcao_prontos[i] = *prato;                
+            pthread_mutex_unlock(&pratos_prontos_mutex);
+            sem_post(&espacos_vazios_balcao);
+        }
+    }
 }
 
-
 void fazer_carne(pedido_t* pedido) { // funcao que realmente faz a carne
-    
     carne_t* carne = create_carne();
     prato_t* prato = create_prato(*pedido);
     
+    if (DEBUG != 0) {printf("Pedido: carne iniciado");}
     cortar_carne(carne);
     temperar_carne(carne);
     
     sem_wait(&frigideira);
     sem_wait(&bocas_livres);
 
+    if (DEBUG != 0) {printf("Pedido: usando boca do fogao e frigideira");}
+
     grelhar_carne(carne);
 
     empratar_carne(carne, prato);
+
+    if (DEBUG != 0) {printf("Pedido %d: Pronto, esperando balcao ",pedido->id);}
 
     sem_post(&frigideira);
     sem_post(&bocas_livres);
@@ -195,11 +216,13 @@ void fazer_carne(pedido_t* pedido) { // funcao que realmente faz a carne
 }
 
 void fazer_spaghetti(pedido_t* pedido) { // funcao que realmente faz o spaghetti
+    
     sem_wait(&frigideira);
     
     sem_wait(&bocas_livres);
     sem_wait(&bocas_livres);
     sem_wait(&bocas_livres);
+    if (DEBUG != 0) {printf("Pedido: Spaghetti iniciado");}
     
     bacon_t* bacon = create_bacon();
     agua_t* agua = create_agua();
@@ -244,22 +267,28 @@ void fazer_spaghetti(pedido_t* pedido) { // funcao que realmente faz o spaghetti
 
 void * interface_fazer_carne(void * arg) {
     cozinheiro_t* coz = (cozinheiro_t*)arg;
+    if (DEBUG != 0) {printf("Thread fazendo carne");}
+
     fazer_carne(coz->pedido);
+    if (DEBUG != 0) {printf("Thread terminou carne");}    
     coz->livre = 1;
     pthread_exit(NULL);
 
 }
 void * interface_fazer_spaghetti(void * arg) {
     cozinheiro_t* coz = (cozinheiro_t*)arg;
+    if (DEBUG != 0) {printf("Thread fazendo massa");}
     fazer_spaghetti(coz->pedido);
+    if (DEBUG != 0) {printf("Thread terminou massa");}    
     coz->livre = 1;
     pthread_exit(NULL);
 
 }
 void * interface_fazer_sopa(void * arg) {
     cozinheiro_t* coz = (cozinheiro_t*)arg;
-
+    if (DEBUG != 0) {printf("Thread fazendo sopa");}
     fazer_sopa(coz->pedido);
+    if (DEBUG != 0) {printf("Thread terminou sopa");}    
     coz->livre = 1;
     sem_post(&cozinheiros_livres);
     pthread_exit(NULL);
