@@ -14,7 +14,7 @@ typedef struct {
     pthread_t thread;
 } cozinheiro_t;
 
-cozinheiro_t* cozinheiro;
+pthread_t cozinheiro;
 int num_cozi;
 int tam_balcao_global;
 
