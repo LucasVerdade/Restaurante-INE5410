@@ -15,6 +15,7 @@ typedef struct {
 } cozinheiro_t;
 
 pthread_t cozinheiro;
+pthread_t garcom;
 int num_cozi;
 int tam_balcao_global;
 
