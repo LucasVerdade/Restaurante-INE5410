@@ -144,7 +144,7 @@ void fazer_sopa(pedido_t* pedido) { // funcao que realmente faz a sopa
     /** fervendo agua**/
     pthread_create(&parte_agua_thread, NULL, interface_agua, (void*)agua );
     /** cortando legumes **/
-    int xx = pthread_create(&parte_legumes_thread, NULL, interface_legumes, (void*)legumes ); 
+    pthread_create(&parte_legumes_thread, NULL, interface_legumes, (void*)legumes ); 
 
     /** esperando as tarefas paralelas terminarem **/
     pthread_join(parte_legumes_thread,NULL);
