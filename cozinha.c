@@ -56,16 +56,17 @@ void cozinha_destroy() {
 
 }
 
-void colocar_no_balcao(prato_t* prato){
-    for(int i = 0; i < tam_balcao_global; i++)
-    {
-        if (balcao_prontos[i].pedido.prato == PEDIDO_NULL){
-            pthread_mutex_lock(&pratos_prontos_mutex);
-            balcao_prontos[i] = *prato;                
-            pthread_mutex_unlock(&pratos_prontos_mutex);
-            sem_post(&espacos_vazios_balcao);
-        }
-    }
+
+void colocar_no_balcao(prato_t* prato) {
+    sem_wait(&espacos_vazios_balcao);
+
+    pthread_mutex_lock(&pratos_prontos_mutex);
+
+        balcao_prontos[cozinheiro_index] = *prato;
+        cozinheiro_index = (cozinheiro_index + 1)% num_cozi;
+
+    pthread_mutex_unlock(&pratos_prontos_mutex);    
+    sem_post(&pratos_prontos_balcao);
 }
 void processar_pedido (pedido_t p) {
     pthread_t gerencia_cozinheiros;
@@ -77,28 +78,20 @@ void processar_pedido (pedido_t p) {
 
 }
 void * funcao_garcom(void * arg) {
-    while (1) {
+     while(1){
         sem_wait(&garcons_livres);
-
         sem_wait(&pratos_prontos_balcao);
         
-        for(int i = 0; i < tam_balcao_global; i++)
-        {
-            if (balcao_prontos[i].pedido.prato != PEDIDO_NULL){
-                pthread_mutex_lock(&pratos_prontos_mutex);
-                 if (DEBUG != 0) {printf("oi, vo entregar essa merda\n");}
-                
-                entregar_pedido(&balcao_prontos[i]);
-                
-                pthread_mutex_unlock(&pratos_prontos_mutex);
-
-                sem_post(&espacos_vazios_balcao);
-
-            }
-        }
-        sem_post(&garcons_livres);
+        pthread_mutex_lock(&pratos_prontos_mutex);
         
-    }
+        entregar_pedido(&balcao_prontos[garcom_index]);
+        garcom_index = (garcom_index + 1) % num_garcom;
+        
+        pthread_mutex_unlock(&pratos_prontos_mutex);
+        
+        sem_post(&espacos_vazios_balcao);
+        sem_post(&garcons_livres);
+    }    
 }
 
 void * produzir_pedido(void * arg){
@@ -106,48 +99,6 @@ void * produzir_pedido(void * arg){
     if (DEBUG != 0) {printf("thread gerenciando pedido num: %d \n",pedido->id);}
     
         sem_wait(&cozinheiros_livres);
-        /*for(int i = 0; i < num_cozi; i++)
-        {
-            cozinheiro_t* coz = &cozinheiro[i];
-            if (coz->livre == 1) {
-                switch(pedido->prato){
-
-                case PEDIDO_SPAGHETTI:
-                    coz->livre = 0;
-                    coz->pedido = (pedido_t*)arg;
-                    pthread_create(&coz->thread,NULL,interface_fazer_spaghetti, (void * )coz);
-                    return NULL;
-                break;
-                
-                case PEDIDO_SOPA:
-                    // Definir a receita da sopa atraves das tarefas
-                    coz->livre = 0;
-                    coz->pedido = (pedido_t*)arg;
-                    pthread_create(&coz->thread,NULL,interface_fazer_sopa, (void * )coz);            
-                    return NULL;
-                break;
-                
-                case PEDIDO_CARNE:
-                    // Definir a receita da carne atraves das tarefas
-                    coz->livre = 0;
-                    coz->pedido = (pedido_t*)arg;
-                    pthread_create(&coz->thread,NULL,interface_fazer_carne, (void * )coz);            
-                    return NULL;
-                break;
-                
-                case PEDIDO__SIZE:
-                    pedido_prato_to_name(pedido->prato);
-                    return NULL;
-                break;
-
-                case PEDIDO_NULL:
-                    pthread_exit(NULL);
-                }   
-            } else if (i == (num_cozi-1)) { //reseta caso não consiga pegar a thread
-                i =0;
-            }
-
-        }*/
         
         switch (pedido->prato)
         {

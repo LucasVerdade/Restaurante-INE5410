@@ -14,6 +14,10 @@ typedef struct {
     pthread_t thread;
 } cozinheiro_t;
 
+int num_garcom;
+int garcom_index;
+int cozinheiro_index;
+
 pthread_t cozinheiro;
 pthread_t garcom;
 int num_cozi;
