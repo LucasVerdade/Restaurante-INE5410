@@ -33,7 +33,7 @@ prato_t* balcao_prontos;
 
 extern void cozinha_init(int cozinheiros, int bocas, int frigideiras, int garcons, int tam_balcao);
 extern void cozinha_destroy();
-extern void processar_pedido(pedido_t* p);
+extern void processar_pedido(pedido_t p);
 
 void * produzir_pedido(void * arg);
 

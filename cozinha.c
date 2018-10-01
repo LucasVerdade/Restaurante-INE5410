@@ -57,7 +57,7 @@ void colocar_no_balcao(prato_t* prato){
 }
 void processar_pedido (pedido_t* pedido) {
     pthread_t gerencia_cozinheiros;
-        if (DEBUG != 0) {printf("Thread gerenciadora de pedidos chamada\n");}
+    if (DEBUG != 0) {printf("Thread gerenciadora de pedidos chamada\n");}
     pthread_create(&gerencia_cozinheiros,0,produzir_pedido, (void *)pedido);
 }
 void * funcao_garcom(void * arg) {
