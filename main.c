@@ -6,6 +6,9 @@
 #include "pedido.h"
 #include "cozinha.h"
 
+    sem_t barreira;    
+
+
 static struct option cmd_opts[] = {
     {"cozinheiros", required_argument, 0, 'c'},
     {"bocas",       required_argument, 0, 'b'},
@@ -82,17 +85,27 @@ int main(int argc, char** argv) {
     
     cozinha_init(cozinheiros, bocas_total, frigideiras, 
                  garcons, balcao);
+    int qtdPedidos = 0;
+    sem_init(&barreira,0,0);
 
     char* buf = (char*)malloc(4096);
     int next_id = 1;
     int ret = 0;
     while((ret = scanf("%4095s", buf)) > 0) {
         pedido_t p = {next_id++, pedido_prato_from_name(buf)};
-        if (!p.prato) 
+        if (!p.prato)  {
             fprintf(stderr, "Pedido inválido descartado: \"%s\"\n", buf);
-        else 
+        } else { 
+            qtdPedidos++;
             processar_pedido(p);
+        }   
     }
+    
+    for(int i = 0; i < qtdPedidos; i++)
+    {
+        sem_wait(&barreira);
+    }
+    
     if (ret != EOF) {
         perror("Erro lendo pedidos de stdin:");
     }
