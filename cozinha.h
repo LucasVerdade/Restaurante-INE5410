@@ -29,7 +29,6 @@ sem_t pratos_prontos_balcao;
 sem_t espacos_vazios_balcao;
 
 sem_t cozinheiros_livres;
-//sem_t garcons_livres;
 
 sem_t frigideira;
 sem_t bocas_livres;

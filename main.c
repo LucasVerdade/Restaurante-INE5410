@@ -83,8 +83,10 @@ int main(int argc, char** argv) {
     check_missing(garcons, "garcons");
     check_missing(balcao, "balcao");
     
-    cozinha_init(cozinheiros, bocas_total, frigideiras, 
-                 garcons, balcao);
+    cozinha_init(cozinheiros, bocas_total, frigideiras, garcons, balcao);
+
+    // Inicializado uma variavel e um semaforo para servir de "barreira" para quando o while terminar 
+    // os cozinheiro e os garçons terminem suas tarefas para dai serem mortos.
     int qtdPedidos = 0;
     sem_init(&barreira,0,0);
 
@@ -100,7 +102,8 @@ int main(int argc, char** argv) {
             processar_pedido(p);
         }   
     }
-    
+
+    // Laço de repetição para dar wait n vezes, sendo n a quantidade de pedidos feito.
     for(int i = 0; i < qtdPedidos; i++)
     {
         sem_wait(&barreira);
