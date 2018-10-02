@@ -6,13 +6,6 @@
 #include <semaphore.h>
 #include <pthread.h>
 
-typedef struct {
-    /* 0 se ocupado, 1 se livre*/
-    int id;
-    int livre;
-    pedido_t* pedido;
-    pthread_t thread;
-} cozinheiro_t;
 
 int num_garcom;
 int garcom_index;
