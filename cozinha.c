@@ -223,7 +223,8 @@ void fazer_spaghetti(pedido_t* pedido) {
 	colocar_no_balcao(prato);
 
 	notificar_prato_no_balcao(prato);
-	sem_post(&cozinheiros_livres);
+	/* sem_post(&cozinheiros_livres); //LINHA ACIDENTAL, NAO ERA PARA EXISTIR ASSIM COMO NAS OUTRAS
+	*  FUNCOES DE RECEITAS (ERRO DE VERSAO) */
 }
 
 // interfaces de comunicacao entre as funcoes de tarefas e as funcoes das threads.
